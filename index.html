@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Canalizaciones Telecom</title>
+  <meta name="description" content="Memoria de cálculo de canalizaciones para telecomunicaciones (canastas, escalerillas, aeroductos, ductos de fibra, tuberías y organizadores).">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar" id="topbar">
+    <div class="brand">
+      <h1>Canalizaciones para telecomunicaciones</h1>
+      <span>Memoria de cálculo · Telecommunications pathway design calculations</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="toolbar">
+      <label class="field" style="flex-direction:row;align-items:center;gap:6px">
+        <span>Proyecto</span>
+        <select id="projectSelect" aria-label="Proyecto abierto"></select>
+      </label>
+      <button class="btn" id="btnNew" type="button">Nuevo</button>
+      <button class="btn" id="btnDup" type="button">Duplicar</button>
+      <button class="btn" id="btnExport" type="button" title="Descargar el proyecto como archivo .json">Exportar</button>
+      <button class="btn" id="btnImport" type="button" title="Abrir un proyecto .json">Importar</button>
+      <button class="btn danger" id="btnDelete" type="button">Eliminar</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </div>
+    <div class="save-state" id="saveState"></div>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Módulos"></nav>
+
+  <main id="view"></main>
+
+  <footer>
+    <span id="footerInfo"></span> ·
+    <a href="admin.html">Administración de catálogos</a>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/catalog-default.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

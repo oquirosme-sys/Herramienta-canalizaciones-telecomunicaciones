@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administración de Catálogos</title>
+  <meta name="description" content="Administración de catálogos: tipos de cable, marcas y tipos de canastas, tuberías y organizadores.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .savebar { position: sticky; top: 0; z-index: 25; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      padding: 8px 16px; background: var(--warn-soft); border-bottom: 1px solid var(--warn); }
+    .login { max-width: 380px; margin: 10vh auto; }
+    td input.w-num { width: 90px; text-align: right; }
+    td input.w-txt { min-width: 160px; }
+    td input.w-pn { min-width: 110px; font-family: Consolas, monospace; }
+    .filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 10px; }
+    .media-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 12px; background: var(--surface-2); }
+  </style>
+</head>
+<body>
+  <header class="topbar" id="topbar">
+    <div class="brand">
+      <h1>Administración de catálogos</h1>
+      <span>Cables · Canalizaciones y marcas · Tuberías · Organizadores · Criterios</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="toolbar">
+      <a class="btn" href="index.html">← Volver a la herramienta</a>
+      <button class="btn hidden" id="btnLogout" type="button">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div id="savebar" class="savebar hidden" role="status">
+    <b>Cambios sin guardar en el catálogo.</b>
+    <button class="btn primary sm" id="btnSave" type="button">Guardar catálogo</button>
+    <button class="btn sm" id="btnDiscard" type="button">Descartar</button>
+  </div>
+
+  <nav class="tabs hidden" id="tabs" aria-label="Secciones del catálogo"></nav>
+  <main id="view"></main>
+
+  <script src="js/config.js"></script>
+  <script src="js/catalog-default.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
