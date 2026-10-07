@@ -532,7 +532,7 @@
       <div class="card-head">
         <h3><span class="sec-code">${esc(l.code)}-A</span> Canalizaciones <span class="en">/ Pathways</span> — canasta, escalera, aeroducto, ducto de fibra</h3>
       </div>
-      <p class="small muted" style="margin:-6px 0 8px">% de llenado: <b>${Math.round(c.fill * 100)} %</b> ${fillTxt(c.fill)}${brands ? ' · ' + brands : ''} <span class="muted">(se definen en Proyecto)</span></p>
+      <p class="small muted" style="margin:-6px 0 8px">% de llenado: <b>${Math.round(c.fill * 100)} %</b> ${fillTxt(c.fill)}${brands ? ' · ' + brands : ''} <span class="muted">(se definen en Proyecto)</span> · <a href="#tipos-canalizacion" data-act="verTipos">¿Qué tipo usar?</a></p>
       <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>Sección o nivel / Section</th><th>Tipo de canalización / Pathway type</th>${cableHeaders(c)}
           <th class="num">Área total (mm²)</th><th>Recomendada* (H×W)</th><th>P/N recomendado</th><th>Selección / Selected</th><th>P/N seleccionado</th><th class="center" title="Verde: dentro del criterio · Amarillo: supera el criterio de diseño · Rojo: excede el 50 % (TIA-569-E cap. 9 / BICSI)">% llenado<br><small>(área total)</small></th><th>Distancia (m)</th><th>Observaciones</th><th class="no-print"></th></tr></thead>
@@ -786,6 +786,71 @@
   }
 
   // ============ Ayuda ============
+  // Glosario básico de tipos de canalización (presentación "Tipos de Canastas" de Sinergia)
+  function tiposCanalizacion() {
+    const foto = (archivo, pie) => `<figure class="foto"><img src="img/tipos/${archivo}" alt="${esc(pie)}" loading="lazy"><figcaption>${esc(pie)}</figcaption></figure>`;
+    return `
+    <section class="card glosario" id="tipos-canalizacion">
+      <h2 style="margin-bottom:6px">Tipos de canalización <span class="en">/ glosario básico</span></h2>
+      <p><b>Bandejas portacables</b> es el término general que abarca todas las canalizaciones tipo bandeja o canasta. Las variantes más utilizadas son la canasta tipo malla y la canasta tipo escalera.</p>
+
+      <div class="glosario-tipo">
+        <div>
+          <h3>Canasta tipo malla <span class="en">/ wire mesh</span></h3>
+          <p>Se utiliza en el sistema de telecomunicaciones, principalmente para cableado de cobre (UTP), y en el sistema eléctrico para conductores de calibre 1/0 AWG o mayores, o para cable armado.</p>
+          <p>Es adecuada para cables cuyo peso no sea muy elevado y cuyo radio de curvatura sea pequeño.</p>
+          <p class="small muted">En la herramienta: tipo «Canasta / Wire mesh» (Panduit, Cablofil).</p>
+        </div>
+        <div class="fotos">
+          ${foto('canasta-malla-utp.jpg', 'Canasta tipo malla con cableado UTP')}
+          ${foto('canasta-malla-cable-armado.jpg', 'Canasta tipo malla con cable armado')}
+        </div>
+      </div>
+
+      <div class="glosario-tipo">
+        <div>
+          <h3>Canasta tipo escalera <span class="en">/ ladder tray</span></h3>
+          <p>Se utiliza cuando la densidad de cableado es alta y, por ende, su peso es alto.</p>
+          <p>También se usa cuando los conductores son muy rígidos y su radio de curvatura es más amplio.</p>
+          <p class="small muted">En la herramienta: tipo «Escalera / Ladder tray».</p>
+        </div>
+        <div class="fotos">
+          ${foto('escalera.jpg', 'Canasta tipo escalera')}
+          ${foto('escalera-instalada.jpg', 'Escalera instalada con derivaciones')}
+          ${foto('escalera-centro-datos.jpg', 'Escalera en centro de datos')}
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 6px">Materiales y acabados</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Material / acabado</th><th>Uso recomendado</th><th class="center">Costo relativo</th></tr></thead>
+        <tbody>
+          <tr><td>Acero</td><td>La opción más económica. Para ambientes sin exposición a humedad ni a factores corrosivos.</td><td class="center">$</td></tr>
+          <tr><td>Galvanizado en frío</td><td>Común en entornos que requieren resistencia moderada a la corrosión.</td><td class="center">$$</td></tr>
+          <tr><td><b>Galvanizado en caliente</b></td><td>Ideal para ambientes industriales o exteriores expuestos a condiciones climáticas severas; el recubrimiento de zinc es mucho más resistente a la corrosión. <b>Es la opción preferente</b> cuando se utilicen este tipo de canastas.</td><td class="center">$$$</td></tr>
+          <tr><td>Aluminio</td><td>Opción ligera y resistente.</td><td class="center">$$$$$</td></tr>
+          <tr><td>Acero inoxidable</td><td>Industria alimentaria, médica y otros sectores donde la higiene y la resistencia a la corrosión son cruciales.</td><td class="center">$$$$$</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="glosario-tipo" style="margin-top:16px">
+        <div>
+          <h3>Bandejas para fibra <span class="en">/ fiber duct</span></h3>
+          <p>Sistema de canales fabricados con polímeros no conductores, exclusivo del sistema de telecomunicaciones. Es una variante de las bandejas tradicionales, diseñada para el enrutamiento de cables de fibra óptica, aunque también puede usarse con cableado de cobre (UTP).</p>
+          <p>Los mayores fabricantes son Panduit (FiberRunner) y CommScope (FiberGuide).</p>
+          <p><b>Ventajas:</b> permite instalar la fibra óptica sin elementos adicionales (como el innerduct); son ligeras y de fácil instalación.</p>
+          <p><b>Desventajas:</b> se fabrican en tamaños reducidos y requieren los accesorios específicos de cada solución para una correcta instalación.</p>
+          <p class="small muted">En la herramienta: tipo «Ducto para fibra / Fiber duct» (Panduit FiberRunner 2×2 a 24×4).</p>
+        </div>
+        <div class="fotos completas">
+          ${foto('fibra-transicion.jpg', 'Ejemplo de transición')}
+          ${foto('fibra-instalacion.jpg', 'Ejemplo de instalación')}
+        </div>
+      </div>
+      ${foto('fibra-tamanos.jpg', 'Tamaños típicos (Panduit FiberRunner)')}
+    </section>`;
+  }
+
   function renderHelp() {
     view.innerHTML = `
     <section class="card">
@@ -802,6 +867,7 @@
       </ol>
       <div class="callout">Los proyectos se guardan automáticamente en este navegador. Use <b>Exportar</b> para respaldar o compartir un proyecto (.json) e <b>Importar</b> para abrirlo en otro equipo. En una siguiente etapa los datos se guardarán en la base de datos (Supabase).</div>
     </section>
+    ${tiposCanalizacion()}
     <section class="card">
       <h3 style="margin-bottom:8px">Símbolos</h3>
       <p>% de llenado real de canalizaciones, sobre el área total: <span class="badge ok">28 %</span> dentro del criterio de diseño · <span class="badge warn">42 %</span> supera el criterio de diseño · <span class="badge err">55 %</span> excede el máximo de 50 % (TIA-569-E cap. 9 / BICSI; aeroducto 20 % NEC 376.22).</p><p>Criterio Sinergia de prellenado: <b>30 %</b>.</p>
@@ -887,6 +953,11 @@
         l[sec] = l[sec].filter((r) => r.id !== b.dataset.id);
         markDirty(); render(); break;
       }
+      case 'verTipos':
+        e.preventDefault();
+        S.tab = 'ayuda'; render();
+        document.getElementById('tipos-canalizacion').scrollIntoView({ behavior: 'smooth' });
+        break;
       case 'print': window.print(); break;
       case 'csv': exportCsv(); break;
     }
