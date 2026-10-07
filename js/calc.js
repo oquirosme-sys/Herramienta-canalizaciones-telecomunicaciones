@@ -91,7 +91,7 @@
     const s = sumCables(row.qty, ctx);
     const r = {
       area: s.area, n: s.n, text: s.text, type: null, rec: null, sel: null, selMode: row.sel,
-      fill: null, limit: ctx.fillLimit, errors: [], warnings: [], length: num(row.length), active: s.area > 0
+      fill: null, limit: null, max: null, errors: [], warnings: [], length: num(row.length), active: s.area > 0
     };
     if (!row.typeId) {
       if (s.area > 0) r.errors.push('Seleccione el tipo de canalización');
@@ -111,9 +111,14 @@
       if (!r.sel) r.warnings.push('La selección no corresponde al tipo/marca actual');
     }
     if (r.sel && s.area > 0) {
-      r.fill = s.area / r.sel.usable;
-      if (r.fill > 1 + EPS) r.errors.push('Llenado real > 100 % del área útil');
-      else if (r.fill > ctx.fillLimit + EPS) r.warnings.push(`Supera el % de diseño (${Math.round(ctx.fillLimit * 100)} % del área útil)`);
+      // % de llenado real sobre el área total de la canalización.
+      // Máximo = factor de área útil (50 % TIA-569-E cap. 9 / BICSI; 20 % aeroducto NEC 376.22(A)).
+      r.max = r.sel.usable / num(r.sel.totalArea_mm2);
+      r.limit = r.max * ctx.fillLimit;
+      r.fill = s.area / num(r.sel.totalArea_mm2);
+      const norma = r.type.id === 'aeroducto' ? 'NEC 2020 Art. 376.22(A)' : 'TIA-569-E cap. 9 / BICSI';
+      if (r.fill > r.max + EPS) r.errors.push(`Excede el llenado máximo de ${Math.round(r.max * 100)} % (${norma})`);
+      else if (r.fill > r.limit + EPS) r.warnings.push(`Supera el criterio de diseño de ${Math.round(r.limit * 100)} %`);
     }
     if (s.area > 0 && row.sel === '') r.warnings.push('Sin selección');
     return r;
@@ -154,9 +159,10 @@
       if (s.n === 3) {
         const jr = cat.jamRatio || { min: 2.8, max: 3.2, factor: 1.05 };
         const ratio = num(jr.factor) * num(r.size.id_in) / s.used[0].od_in;
+        const rtxt = ratio.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         if (ratio >= num(jr.min) && ratio <= num(jr.max)) {
-          r.warnings.push(`Jam ratio ${ratio.toFixed(2)} (${jr.min}–${jr.max}): subir un tamaño / upsize one size`);
-        } else r.info.push(`Jam ratio ${ratio.toFixed(2)} OK`);
+          r.warnings.push(`Jam ratio ${rtxt} (${jr.min}–${jr.max}): subir un tamaño / upsize one size`);
+        } else r.info.push(`Jam ratio ${rtxt} OK`);
       }
     }
     const lim = cat.conduitLimits || { maxLength_m: 30, maxBends: 2 };

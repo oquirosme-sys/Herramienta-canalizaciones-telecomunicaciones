@@ -9,6 +9,7 @@
 
   const DEFAULT_CABLES = { utp: 'U/UTP Cat 6a', fo_in: '12 hilos', fo_inout: '12 hilos', coax: 'RG-6', multipar: '25 pares', innerduct: '' };
   const ROWS_PER_SECTION = 5;
+  const SINERGIA_FILL = 0.3; // criterio Sinergia de prellenado
 
   // ============ Modelo ============
   const emptyPathway = () => ({ id: uid(), section: '', typeId: '', qty: {}, sel: 'auto', length: '', notes: '' });
@@ -32,7 +33,7 @@
     return {
       id: uid(), schema: 1, number: '', name, location: '', client: '',
       date: new Date().toISOString().slice(0, 10), preparedBy: '', revision: '0', notes: '',
-      fillPathway: 0.4, fillManager: 0.4, brands: pw,
+      fillPathway: 0.3, fillManager: 0.4, brands: pw,
       cables: [
         ...cat.cableMedia.map((m) => ({
           id: uid(), mediaId: m.id,
@@ -193,10 +194,24 @@
       <td class="num calc" data-out="area">${od ? fmt(Calc.circleArea(od), 2) : ''}</td>`;
   }
 
+  /* Recomendación de ANSI/TIA-569-E cap. 9 (9.7.1.1) y BICSI TDMM para el % de llenado elegido.
+     Amarillo en 30 % y 40 % (con reserva limitada), rojo en 50 % (sin reserva). */
+  function fillAdvice(v) {
+    const f = Math.round(Calc.num(v) * 100);
+    const base = 'ANSI/TIA-569-E cap. 9 (9.7.1.1) y BICSI TDMM: el llenado de canastas y escalerillas no debe exceder el 50 % del área total de la canalización.';
+    const txt = {
+      25: ['callout', 'Llenado inicial recomendado por TIA-569-E (25 %): deja la mitad de la capacidad para crecimiento futuro.'],
+      30: ['callout warn', '<b>Criterio Sinergia de prellenado (30 %).</b> Deja un 20 % de reserva antes del máximo de 50 %. Verificar que el crecimiento previsto del cliente quepa en esa reserva.'],
+      40: ['callout warn', '<b>Poco crecimiento futuro (40 %).</b> Solo queda un 10 % de reserva antes del máximo de 50 %. Usar únicamente con justificación del cliente; el criterio Sinergia es 30 %.'],
+      50: ['callout err', '<b>Llenado máximo (50 %), sin reserva de crecimiento.</b> Cualquier cable adicional excede TIA-569-E. No se recomienda como criterio de diseño.']
+    }[f] || ['callout', ''];
+    return `<div class="${txt[0]}">${txt[1]} <span class="small">${base}</span></div>`;
+  }
+
   function renderProject() {
     const p = S.project, cat = S.catalog, cols = Calc.projectCables(p, cat);
     const colById = Object.fromEntries(cols.map((c) => [c.id, c]));
-    const fillOpts = (v) => cat.fillOptions.map((o) => opt(o.value, Math.round(o.value * 100) + ' %', Calc.num(v) === o.value)).join('');
+    const fillOpts = (v) => cat.fillOptions.map((o) => opt(o.value, Math.round(o.value * 100) + ' %' + (o.value === SINERGIA_FILL ? ' — criterio Sinergia' : ''), Calc.num(v) === o.value)).join('');
     const fillDesc = (v) => esc((cat.fillOptions.find((o) => o.value === Calc.num(v)) || {}).label || '');
     const ev = Calc.evalProject(p, cat);
 
@@ -272,6 +287,7 @@
       <div class="grid">
         <label class="field"><span>Canalizaciones: % de llenado / Fill ratio</span><select data-p="fillPathway">${fillOpts(p.fillPathway)}</select></label>
         <div class="field" style="grid-column:span 2"><span>&nbsp;</span><div class="small">${fillDesc(p.fillPathway)}</div></div>
+        <div style="grid-column:1/-1">${fillAdvice(p.fillPathway)}</div>
         ${brandRows}
         <label class="field"><span>Organizadores de cable: % de llenado</span><select data-p="fillManager">${fillOpts(p.fillManager)}</select></label>
         <div class="field" style="grid-column:span 2"><span>&nbsp;</span><div class="small">${fillDesc(p.fillManager)}</div></div>
@@ -384,9 +400,10 @@
     ...r.warnings.map((m) => `<div class="w">⚠ ${esc(m)}</div>`),
     ...(r.info || []).map((m) => `<div class="i">✓ ${esc(m)}</div>`)
   ].join('');
-  function fillBadge(f, limit) {
+  // Verde: dentro del criterio de diseño · amarillo: sobre el criterio · rojo: excede el máximo (50 % TIA-569-E)
+  function fillBadge(f, limit, max = 1) {
     if (f == null) return '';
-    const cls = f > 1 + 1e-9 ? 'err' : f > limit + 1e-9 ? 'warn' : 'ok';
+    const cls = f > max + 1e-9 ? 'err' : f > limit + 1e-9 ? 'warn' : 'ok';
     return `<span class="badge ${cls}">${pct(f)}</span>`;
   }
   const actionCells = (sec, id) => `<td class="actions no-print">
@@ -401,7 +418,7 @@
       rec: esc(rec),
       recpn: r.rec ? `<span class="pn">${esc(r.rec.partNumber || '—')}</span>` : '',
       selpn: r.sel ? `<span class="pn">${esc(r.sel.partNumber || '—')}</span>` + (r.selMode === 'auto' ? ' <span class="muted small">(auto)</span>' : '') : '',
-      fill: fillBadge(r.fill, r.limit),
+      fill: fillBadge(r.fill, r.limit, r.max),
       msgs: msgs(r)
     };
   }
@@ -513,12 +530,12 @@
     ${noCables}
     <section class="card">
       <div class="card-head">
-        <h3>G–K. Canalizaciones <span class="en">/ Pathways</span> — canasta, escalera, aeroducto, ducto de fibra</h3>
+        <h3><span class="sec-code">${esc(l.code)}-A</span> Canalizaciones <span class="en">/ Pathways</span> — canasta, escalera, aeroducto, ducto de fibra</h3>
       </div>
       <p class="small muted" style="margin:-6px 0 8px">% de llenado: <b>${Math.round(c.fill * 100)} %</b> ${fillTxt(c.fill)}${brands ? ' · ' + brands : ''} <span class="muted">(se definen en Proyecto)</span></p>
       <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>Sección o nivel / Section</th><th>Tipo de canalización / Pathway type</th>${cableHeaders(c)}
-          <th class="num">Área total (mm²)</th><th>Recomendada* (H×W)</th><th>P/N recomendado</th><th>Selección / Selected</th><th>P/N seleccionado</th><th class="center">% llenado real (área útil)</th><th>Distancia (m)</th><th>Observaciones</th><th class="no-print"></th></tr></thead>
+          <th class="num">Área total (mm²)</th><th>Recomendada* (H×W)</th><th>P/N recomendado</th><th>Selección / Selected</th><th>P/N seleccionado</th><th class="center" title="Verde: dentro del criterio · Amarillo: supera el criterio de diseño · Rojo: excede el 50 % (TIA-569-E cap. 9 / BICSI)">% llenado real (área total, máx. 50 %)</th><th>Distancia (m)</th><th>Observaciones</th><th class="no-print"></th></tr></thead>
         <tbody>${l.pathways.map((r, i) => pathwayRow(r, i, c)).join('')}</tbody>
       </table></div>
       <div class="row-inline no-print" style="margin-top:8px">
@@ -528,7 +545,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>L–O. Tuberías <span class="en">/ Conduits</span><sup>+</sup></h3></div>
+      <div class="card-head"><h3><span class="sec-code">${esc(l.code)}-B</span> Tuberías <span class="en">/ Conduits</span><sup>+</sup></h3></div>
       <p class="small muted" style="margin:-6px 0 8px">NO SE DEBEN MEZCLAR DISTINTOS TIPOS DE CABLES DENTRO DE UNA MISMA TUBERÍA / Different cable types should not be mixed within the same conduit.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>Uso de la tubería / Use</th><th>Tipo de tubería / Type</th>${cableHeaders(c)}
@@ -542,7 +559,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h3>P–S. Organizadores de cable <span class="en">/ Cable managers</span></h3></div>
+      <div class="card-head"><h3><span class="sec-code">${esc(l.code)}-C</span> Organizadores de cable <span class="en">/ Cable managers</span></h3></div>
       <p class="small muted" style="margin:-6px 0 8px">% de llenado: <b>${Math.round(c.fillMgr * 100)} %</b> ${fillTxt(c.fillMgr)}. Organizadores doble lado: ingrese el total de cables de ambos lados (frontal + posterior).</p>
       <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>Identificación</th><th>Tipo de organizador / Type</th>${cableHeaders(c)}
@@ -616,43 +633,77 @@
     const { full, scoped } = memoriaData();
     const c = full.ctx;
     const t = full.totals;
-    const fillLbl = (v) => Math.round(v * 100) + ' % — ' + ((cat.fillOptions.find((o) => o.value === v) || {}).label || '');
+    const fillLbl = (x) => Math.round(x * 100) + ' % — ' + ((cat.fillOptions.find((o) => o.value === x) || {}).label || '');
     const brandTxt = cat.pathwayTypes.map((x) => `${x.name}: ${Calc.brandFor(c, x.id) || '—'}`).join('; ');
     const nec = cat.necFill;
     const lim = cat.conduitLimits;
-    const scopeName = S.memLevel === 'all' ? 'Edificio completo' : (p.levels.find((l) => l.id === S.memLevel) || {}).code;
+    const scopeName = S.memLevel === 'all' ? 'edificio completo' : (p.levels.find((l) => l.id === S.memLevel) || {}).code;
+    // Formato Sinergia: ninguna celda en blanco; la raya indica "sin dato"
+    const v = (x) => (x === null || x === undefined || x === '') ? '—' : esc(x);
+    const n1 = (x) => (x ? fmt(x, 1) : '—');
+    let tn = 0;
+    const tabla = (name, heads, rows, emptyText = 'Sin tramos') => {
+      tn++;
+      const ths = heads.map(([h, cls]) => `<th${cls ? ` class="${cls}"` : ''}>${h}</th>`).join('');
+      return `<figure class="doc-table">
+        <figcaption>Tabla No. ${tn}<br><span>${name}</span></figcaption>
+        <div class="table-wrap"><table><thead><tr>${ths}</tr></thead>
+        <tbody>${rows.length ? rows.join('') : `<tr><td colspan="${heads.length}">— ${esc(emptyText)}</td></tr>`}</tbody></table></div>
+      </figure>`;
+    };
+    const crit = (r) => [
+      ...r.errors.map((m) => `<span class="crit-err">${esc(m)}</span>`),
+      ...r.warnings.map((m) => `<span class="crit-warn">${esc(m)}</span>`),
+      ...(r.info || []).map((m) => esc(m))
+    ].join('; ') || '—';
+    const fillTxt = (f, limit, max) => {
+      if (f == null) return '—';
+      const cls = max != null && f > max + 1e-9 ? 'crit-err' : limit != null && f > limit + 1e-9 ? 'crit-warn' : '';
+      return cls ? `<span class="${cls}">${pct(f)}</span>` : pct(f);
+    };
 
-    const levelRows = full.levels.map((lv, i) => `<tr><td class="num">${i + 1}</td><td>${esc(lv.level.code)}</td><td>${esc(lv.level.name)}</td>
+    const levelRows = full.levels.map((lv, i) => `<tr><td class="num">${i + 1}</td><td>${v(lv.level.code)}</td><td>${v(lv.level.name)}</td>
       <td class="num">${lv.counts.pathways}</td><td class="num">${lv.counts.conduits}</td><td class="num">${lv.counts.managers}</td>
-      <td class="num">${lv.counts.errors || ''}</td><td class="num">${lv.counts.warnings || ''}</td>
-      <td class="num">${fmt(lv.counts.lenPathways, 1)}</td><td class="num">${fmt(lv.counts.lenConduits, 1)}</td></tr>`).join('');
-
-    const pwRows = scoped.pathwayGroups.map((g) => `<tr><td>${esc(g.type)}</td><td>${esc(g.size)}</td><td>${esc(g.brand)}</td><td class="pn">${esc(g.pn)}</td><td class="num">${g.count}</td><td class="num">${fmt(g.length, 1)}</td></tr>`).join('');
-    const cdRows = scoped.conduitGroups.map((g) => `<tr><td>${esc(g.type)}</td><td>${esc(g.size)}</td><td class="num">${g.count}</td><td class="num">${fmt(g.length, 1)}</td></tr>`).join('');
-    const mgRows = scoped.managerGroups.map((g) => `<tr><td>${esc(g.type)}</td><td>${esc(g.model)}</td><td class="pn">${esc(g.pn)}</td><td class="num">${g.count}</td></tr>`).join('');
+      <td class="num">${lv.counts.errors ? `<span class="crit-err">${lv.counts.errors}</span>` : 0}</td><td class="num">${lv.counts.warnings ? `<span class="crit-warn">${lv.counts.warnings}</span>` : 0}</td>
+      <td class="num">${fmt(lv.counts.lenPathways, 1)}</td><td class="num">${fmt(lv.counts.lenConduits, 1)}</td></tr>`);
+    if (levelRows.length) {
+      levelRows.push(`<tr class="total"><td class="num">—</td><td>—</td><td>Total edificio</td><td class="num">${t.pathways || 0}</td><td class="num">${t.conduits || 0}</td><td class="num">${t.managers || 0}</td><td class="num">${t.errors || 0}</td><td class="num">${t.warnings || 0}</td><td class="num">${fmt(t.lenPathways || 0, 1)}</td><td class="num">${fmt(t.lenConduits || 0, 1)}</td></tr>`);
+    }
+    const pwRows = scoped.pathwayGroups.map((g) => `<tr><td>${v(g.type)}</td><td>${v(g.size)}</td><td>${v(g.brand)}</td><td class="pn">${v(g.pn)}</td><td class="num">${g.count}</td><td class="num">${fmt(g.length, 1)}</td></tr>`);
+    const cdRows = scoped.conduitGroups.map((g) => `<tr><td>${v(g.type)}</td><td>${v(g.size)}</td><td class="num">${g.count}</td><td class="num">${fmt(g.length, 1)}</td></tr>`);
+    const mgRows = scoped.managerGroups.map((g) => `<tr><td>${v(g.type)}</td><td>${v(g.model)}</td><td class="pn">${v(g.pn)}</td><td class="num">${g.count}</td></tr>`);
+    const cabRows = c.definedCables.map((x) => `<tr><td>${v(x.mediaName)}</td><td>${v(x.custom ? x.header + (x.name && x.name !== x.header ? ' — ' + x.name : '') : x.name)}</td><td class="num">${fmt(x.od_in, 3)}</td><td class="num">${fmt(x.od_in * 25.4, 2)}</td><td class="num">${fmt(x.area, 2)}</td></tr>`);
+    const critRows = [
+      ['Canalizaciones (canasta, escalera, aeroducto, ducto de fibra)', fillLbl(c.fill)],
+      ['Llenado máximo de canalizaciones', 'ANSI/TIA-569-E cap. 9, sec. 9.7.1.1 y BICSI TDMM 14: 50 % del área total; aeroducto NEC 2020 art. 376.22(A): 20 %'],
+      ['Criterio Sinergia de prellenado', '30 % del área total (deja reserva de crecimiento hasta el máximo de 50 %)'],
+      ['Fabricante', brandTxt],
+      ['Organizadores de cable', fillLbl(c.fillMgr)],
+      ['Tuberías', `NEC 2020 cap. 9 tabla 1: 1 cable ${Math.round(nec.one * 100)} %, 2 cables ${Math.round(nec.two * 100)} %, 3 o más ${Math.round(nec.more * 100)} %; tamaño mínimo 3/4" (21)`],
+      ['Limitaciones', `Tuberías: tramos ≤ ${lim.maxLength_m} m con máx. ${lim.maxBends} curvas de 90° (reducir 15 % por curva adicional). No mezclar tipos de cable en una tubería.`]
+    ].map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`);
 
     const detPw = [], detCd = [], detMg = [];
     scoped.levels.forEach((lv) => {
       lv.pathways.forEach(({ row, res }) => {
         if (!res.active) return;
-        detPw.push(`<tr><td>${esc(lv.level.code)}</td><td>${esc(row.section)}</td><td>${esc(res.type ? res.type.name : '—')}</td><td>${esc(res.text)}</td>
-          <td class="num">${fmt(res.area, 1)}</td><td>${esc(res.sel ? res.sel.label : 'Sin selección / Not selected')}</td><td class="pn">${esc(res.sel ? res.sel.partNumber : '')}</td>
-          <td class="num">${fillBadge(res.fill, res.limit)}</td><td class="num">${res.length ? fmt(res.length, 1) : ''}</td><td class="msgs">${msgs(res)}</td></tr>`);
+        detPw.push(`<tr><td>${v(lv.level.code)}-A</td><td>${v(row.section)}</td><td>${v(res.type ? res.type.name : '')}</td><td>${v(res.text)}</td>
+          <td class="num">${fmt(res.area, 1)}</td><td>${res.sel ? esc(res.sel.label) : '<span class="crit-warn">Sin selección</span>'}</td><td class="pn">${v(res.sel ? res.sel.partNumber : '')}</td>
+          <td class="num">${fillTxt(res.fill, res.limit, res.max)}</td><td class="num">${n1(res.length)}</td><td class="obs">${crit(res)}</td></tr>`);
       });
       lv.conduits.forEach(({ row, res }) => {
         if (!res.active) return;
-        detCd.push(`<tr><td>${esc(lv.level.code)}</td><td>${esc(row.use)}</td><td>${esc(row.typeId)}</td><td>${esc(res.text)}</td>
-          <td class="num">${fmt(res.area, 1)}</td><td class="center">${esc(res.sizeLabel)}</td><td class="num">${res.mm || ''}</td>
-          <td class="num">${res.fillReal != null ? pct(res.fillReal) : ''}</td><td class="num">${res.length ? fmt(res.length, 1) : ''}</td><td class="msgs">${msgs(res)}</td></tr>`);
+        detCd.push(`<tr><td>${v(lv.level.code)}-B</td><td>${v(row.use)}</td><td>${v(row.typeId)}</td><td>${v(res.text)}</td>
+          <td class="num">${fmt(res.area, 1)}</td><td class="num">${v(res.sizeLabel)}</td><td class="num">${v(res.mm)}</td>
+          <td class="num">${res.fillReal != null ? pct(res.fillReal) : '—'}</td><td class="num">${n1(res.length)}</td><td class="obs">${crit(res)}</td></tr>`);
       });
       lv.managers.forEach(({ row, res }) => {
         if (!res.active) return;
-        detMg.push(`<tr><td>${esc(lv.level.code)}</td><td>${esc(row.label)}</td><td>${esc(res.type ? res.type.name : '—')}</td><td>${esc(res.text)}</td>
-          <td class="num">${fmt(res.area, 1)}</td><td>${esc(res.rec ? res.rec.label : '')}</td><td class="pn">${esc(res.rec ? res.rec.partNumber : '')}</td>
-          <td class="num">${res.fill != null ? pct(res.fill) : ''}</td><td class="msgs">${msgs(res)}</td></tr>`);
+        detMg.push(`<tr><td>${v(lv.level.code)}-C</td><td>${v(row.label)}</td><td>${v(res.type ? res.type.name : '')}</td><td>${v(res.text)}</td>
+          <td class="num">${fmt(res.area, 1)}</td><td>${v(res.rec ? res.rec.label : '')}</td><td class="pn">${v(res.rec ? res.rec.partNumber : '')}</td>
+          <td class="num">${res.fill != null ? pct(res.fill) : '—'}</td><td class="obs">${crit(res)}</td></tr>`);
       });
     });
-    const none = (n) => `<tr><td colspan="${n}" class="muted">Sin tramos / none</td></tr>`;
 
     view.innerHTML = `
     <div class="card no-print row-inline">
@@ -660,78 +711,49 @@
         <select id="memLevel">${opt('all', 'Edificio completo', S.memLevel === 'all')}${p.levels.map((l) => opt(l.id, `${l.code} — ${l.name}`, l.id === S.memLevel)).join('')}</select></label>
       <button class="btn primary" data-act="print">Imprimir / Guardar PDF</button>
       <button class="btn" data-act="csv">Exportar CSV</button>
-      <span class="muted small">La memoria se actualiza automáticamente con los datos de cada nivel.</span>
+      <span class="muted small">Formato Sinergia: hoja carta, márgenes 3,0 / 2,5 cm. Verifique la impresión en el PDF.</span>
     </div>
-    <article class="card report">
-      <div class="title">
-        <h1>MEMORIA DE CÁLCULO — CANALIZACIONES PARA TELECOMUNICACIONES</h1>
-        <div class="muted">Telecommunications pathway design calculations · ${esc(scopeName)}</div>
-      </div>
+    <article class="report doc">
+      <header class="doc-head">
+        <div class="doc-logo">sinergia<small>ingeniería</small></div>
+        <div class="doc-addr">Sinergia Consultoría Mecánica y Eléctrica S.A<br>Oficentro Plaza Roble, Edificio Pórtico, Escazú</div>
+      </header>
+      <h1 class="doc-title">Memoria de cálculo de canalizaciones para telecomunicaciones</h1>
+      <p class="doc-sub">${esc(p.name || '')}${p.number ? ' · proyecto ' + esc(p.number) : ''} · alcance: ${esc(scopeName)}</p>
 
-      <h2>1. Datos del proyecto <span class="en">/ Project data</span></h2>
+      <h2>1. Datos del proyecto</h2>
       <dl class="kv">
-        <dt>Proyecto # / Project #</dt><dd>${esc(p.number)}</dd>
-        <dt>Nombre / Name</dt><dd>${esc(p.name)}</dd>
-        <dt>Cliente / Client</dt><dd>${esc(p.client)}</dd>
-        <dt>Ubicación / Location</dt><dd>${esc(p.location)}</dd>
-        <dt>Fecha / Date</dt><dd>${esc(p.date)}</dd>
-        <dt>Elaboró / Prepared by</dt><dd>${esc(p.preparedBy)}</dd>
-        <dt>Revisión / Revision</dt><dd>${esc(p.revision)}</dd>
+        <dt>proyecto #</dt><dd>${v(p.number)}</dd>
+        <dt>nombre</dt><dd>${v(p.name)}</dd>
+        <dt>cliente</dt><dd>${v(p.client)}</dd>
+        <dt>ubicación</dt><dd>${v(p.location)}</dd>
+        <dt>fecha</dt><dd>${v(p.date)}</dd>
+        <dt>elaboró</dt><dd>${v(p.preparedBy)}</dd>
+        <dt>revisión</dt><dd>${v(p.revision)}</dd>
       </dl>
 
-      <h2>2. Criterios de diseño <span class="en">/ Design criteria</span></h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Elemento / Item</th><th>Criterio / Criterion</th></tr></thead>
-        <tbody>
-          <tr><td>Canalizaciones (canasta, escalera, aeroducto, ducto de fibra)</td><td>${esc(fillLbl(c.fill))}</td></tr>
-          <tr><td>Fabricante / Brand</td><td>${esc(brandTxt)}</td></tr>
-          <tr><td>Organizadores de cable / Cable managers</td><td>${esc(fillLbl(c.fillMgr))}</td></tr>
-          <tr><td>Tuberías / Conduits</td><td>NEC 2020 Cap. 9 Tabla 1: 1 cable ${Math.round(nec.one * 100)} %, 2 cables ${Math.round(nec.two * 100)} %, 3 o más ${Math.round(nec.more * 100)} %; tamaño mínimo 3/4" (21)</td></tr>
-          ${cat.pathwayTypes.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.basis || '')} (área útil ${Math.round(x.usableFactor * 100)} %)</td></tr>`).join('')}
-          <tr><td>Limitaciones / Limits</td><td>Tuberías: tramos ≤ ${lim.maxLength_m} m con máx. ${lim.maxBends} curvas de 90° (reducir 15 % por curva adicional). No mezclar tipos de cable en una tubería.</td></tr>
-        </tbody></table></div>
+      <h2>2. Criterios de diseño</h2>
+      ${tabla('Criterios de diseño aplicados', [['elemento'], ['criterio']], critRows)}
 
-      <h2>3. Tipos de cable <span class="en">/ Cable types</span></h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Medio de TX</th><th>Tipo</th><th class="num">OD (in)</th><th class="num">OD (mm)</th><th class="num">Área (mm²)</th></tr></thead>
-        <tbody>${c.definedCables.map((x) => `<tr><td>${esc(x.mediaName)}</td><td>${esc(x.custom ? x.header + (x.name && x.name !== x.header ? ' — ' + x.name : '') : x.name)}</td><td class="num">${fmt(x.od_in, 3)}</td><td class="num">${fmt(x.od_in * 25.4, 2)}</td><td class="num">${fmt(x.area, 2)}</td></tr>`).join('') || none(5)}</tbody>
-      </table></div>
+      <h2>3. Tipos de cable</h2>
+      ${tabla('Tipos de cable utilizados en el proyecto', [['medio de transmisión'], ['tipo'], ['OD (in)', 'num'], ['OD (mm)', 'num'], ['área (mm²)', 'num']], cabRows, 'Sin cables definidos')}
 
-      <h2>4. Niveles del edificio <span class="en">/ Building levels</span></h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th class="num">#</th><th>Pestaña / Tab</th><th>Nivel / Level</th><th class="num">Tramos canal.</th><th class="num">Tramos tubería</th><th class="num">Organizadores</th><th class="num">Errores ❌</th><th class="num">Advert. ⚠</th><th class="num">Long. canal. (m)</th><th class="num">Long. tubería (m)</th></tr></thead>
-        <tbody>${levelRows || none(10)}</tbody>
-        <tfoot><tr><td></td><td></td><td>TOTAL EDIFICIO</td><td class="num">${t.pathways || 0}</td><td class="num">${t.conduits || 0}</td><td class="num">${t.managers || 0}</td><td class="num">${t.errors || 0}</td><td class="num">${t.warnings || 0}</td><td class="num">${fmt(t.lenPathways || 0, 1)}</td><td class="num">${fmt(t.lenConduits || 0, 1)}</td></tr></tfoot>
-      </table></div>
+      <h2>4. Niveles del edificio</h2>
+      ${tabla('Resumen por nivel', [['#', 'num'], ['pestaña'], ['nivel'], ['tramos canalización', 'num'], ['tramos tubería', 'num'], ['organizadores', 'num'], ['errores', 'num'], ['advertencias', 'num'], ['long. canalización (m)', 'num'], ['long. tubería (m)', 'num']], levelRows, 'Sin niveles')}
 
-      <h2>5. Canalizaciones — tramos por tamaño <span class="en">/ Pathways by size</span> (${esc(scopeName)})</h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Tipo / Type</th><th>Tamaño seleccionado / Size</th><th>Marca</th><th>Número de parte / P/N</th><th class="num">Tramos</th><th class="num">Longitud (m)</th></tr></thead>
-        <tbody>${pwRows || none(6)}</tbody></table></div>
+      <h2>5. Canalizaciones por tamaño</h2>
+      ${tabla(`Canalizaciones seleccionadas — ${esc(scopeName)}`, [['tipo'], ['tamaño seleccionado'], ['marca'], ['número de parte'], ['tramos', 'num'], ['longitud (m)', 'num']], pwRows)}
 
-      <h2>6. Tuberías — tramos por diámetro <span class="en">/ Conduits by size</span> (${esc(scopeName)})</h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Tipo / Type</th><th>Diámetro / Size</th><th class="num">Tramos</th><th class="num">Longitud (m)</th></tr></thead>
-        <tbody>${cdRows || none(4)}</tbody></table></div>
+      <h2>6. Tuberías por diámetro</h2>
+      ${tabla(`Tuberías por diámetro — ${esc(scopeName)}`, [['tipo'], ['diámetro'], ['tramos', 'num'], ['longitud (m)', 'num']], cdRows)}
 
-      <h2>7. Organizadores de cable <span class="en">/ Cable managers</span> (${esc(scopeName)})</h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Tipo / Type</th><th>Modelo / Model</th><th>Número de parte / P/N</th><th class="num">Cantidad</th></tr></thead>
-        <tbody>${mgRows || none(4)}</tbody></table></div>
+      <h2>7. Organizadores de cable</h2>
+      ${tabla(`Organizadores de cable — ${esc(scopeName)}`, [['tipo'], ['modelo'], ['número de parte'], ['cantidad', 'num']], mgRows, 'Sin organizadores')}
 
-      <h2>8. Detalle de tramos por nivel <span class="en">/ Segment detail</span></h2>
-      <h3 style="margin:8px 0">Canalizaciones</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Nivel</th><th>Sección</th><th>Tipo</th><th>Cables</th><th class="num">Área (mm²)</th><th>Canalización final</th><th>P/N</th><th class="num">% llenado real</th><th class="num">Distancia (m)</th><th>Observaciones</th></tr></thead>
-        <tbody>${detPw.join('') || none(10)}</tbody></table></div>
-      <h3 style="margin:12px 0 8px">Tuberías</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Nivel</th><th>Uso</th><th>Tipo</th><th>Cables</th><th class="num">Área (mm²)</th><th class="center">Diámetro (in)</th><th class="num">(mm)</th><th class="num">% llenado</th><th class="num">Distancia (m)</th><th>Advertencias</th></tr></thead>
-        <tbody>${detCd.join('') || none(10)}</tbody></table></div>
-      <h3 style="margin:12px 0 8px">Organizadores</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Nivel</th><th>Identificación</th><th>Tipo</th><th>Cables</th><th class="num">Área (mm²)</th><th>Organizador</th><th>P/N</th><th class="num">% llenado</th><th>Observaciones</th></tr></thead>
-        <tbody>${detMg.join('') || none(9)}</tbody></table></div>
+      <h2>8. Detalle de tramos por nivel</h2>
+      ${tabla('Detalle de canalizaciones (sección A de cada nivel)', [['sección'], ['tramo'], ['tipo'], ['cables'], ['área (mm²)', 'num'], ['canalización final'], ['número de parte'], ['llenado real (% área total)', 'num'], ['distancia (m)', 'num'], ['observaciones']], detPw)}
+      ${tabla('Detalle de tuberías (sección B de cada nivel)', [['sección'], ['uso'], ['tipo'], ['cables'], ['área (mm²)', 'num'], ['diámetro (in)', 'num'], ['diámetro (mm)', 'num'], ['llenado real (%)', 'num'], ['distancia (m)', 'num'], ['advertencias']], detCd)}
+      ${tabla('Detalle de organizadores (sección C de cada nivel)', [['sección'], ['identificación'], ['tipo'], ['cables'], ['área (mm²)', 'num'], ['organizador'], ['número de parte'], ['llenado real (%)', 'num'], ['observaciones']], detMg, 'Sin organizadores')}
       ${footnotes()}
     </article>`;
   }
@@ -750,7 +772,7 @@
       ...scoped.conduitGroups.map((g) => [g.type, g.size, g.count, g.length]),
       [], ['ORGANIZADORES'], ['Tipo', 'Modelo', 'P/N', 'Cantidad'],
       ...scoped.managerGroups.map((g) => [g.type, g.model, g.pn, g.count]),
-      [], ['DETALLE CANALIZACIONES'], ['Nivel', 'Sección', 'Tipo', 'Cables', 'Área (mm²)', 'Canalización final', 'P/N', '% llenado', 'Distancia (m)', 'Observaciones']
+      [], ['DETALLE CANALIZACIONES'], ['Nivel', 'Sección', 'Tipo', 'Cables', 'Área (mm²)', 'Canalización final', 'P/N', '% llenado (área total)', 'Distancia (m)', 'Observaciones']
     ];
     const notes = (r) => [...r.errors, ...r.warnings, ...(r.info || [])].join(' | ');
     scoped.levels.forEach((lv) => lv.pathways.forEach(({ row, res }) => {
@@ -773,16 +795,16 @@
         <li><b>Tipos de cable (B):</b> para cada medio de transmisión seleccione el tipo de cable. Si requiere otro tipo, use los <b>tipos adicionales (C–E)</b>: nombre, descripción y diámetro externo en pulgadas.</li>
         <li><b>Criterios (F):</b> seleccione el % de llenado de canalizaciones y de organizadores, y la marca de canasta.</li>
         <li><b>Niveles:</b> agregue los niveles del edificio (N01, N02, S1, AZOTEA…). Cada nivel aparece como una pestaña.</li>
-        <li><b>En cada nivel (G–K):</b> identifique cada sección de canalización, seleccione el tipo y la cantidad de cables de cada tipo. La herramienta muestra la canalización recomendada y su número de parte. En <i>Selección</i> deje "Automática" o elija otra; el % de llenado real se calcula con la canalización elegida.</li>
-        <li><b>Tuberías (L–O):</b> identifique cada tubería, su tipo y la cantidad de cables (un solo tipo de cable por tubería). Se muestra el diámetro requerido según NEC y las advertencias (jam ratio, longitud, curvas).</li>
-        <li><b>Organizadores (P–S):</b> seleccione el tipo de organizador e ingrese la cantidad de cables.</li>
+        <li><b>Sección A de cada nivel (N01-A, canalizaciones):</b> identifique cada sección de canalización, seleccione el tipo y la cantidad de cables de cada tipo. La herramienta muestra la canalización recomendada y su número de parte. En <i>Selección</i> deje "Automática" o elija otra; el % de llenado real se calcula con la canalización elegida.</li>
+        <li><b>Sección B (N01-B, tuberías):</b> identifique cada tubería, su tipo y la cantidad de cables (un solo tipo de cable por tubería). Se muestra el diámetro requerido según NEC y las advertencias (jam ratio, longitud, curvas).</li>
+        <li><b>Sección C (N01-C, organizadores):</b> seleccione el tipo de organizador e ingrese la cantidad de cables.</li>
         <li><b>Memoria de cálculo:</b> consolida niveles, tramos por tamaño, tuberías por diámetro, organizadores y el detalle de tramos. Puede imprimirse o guardarse como PDF y exportarse a CSV.</li>
       </ol>
       <div class="callout">Los proyectos se guardan automáticamente en este navegador. Use <b>Exportar</b> para respaldar o compartir un proyecto (.json) e <b>Importar</b> para abrirlo en otro equipo. En una siguiente etapa los datos se guardarán en la base de datos (Supabase).</div>
     </section>
     <section class="card">
       <h3 style="margin-bottom:8px">Símbolos</h3>
-      <p><span class="badge ok">40 %</span> llenado dentro del criterio · <span class="badge warn">85 %</span> supera el % de diseño · <span class="badge err">110 %</span> supera el 100 % del área útil.</p>
+      <p>% de llenado real de canalizaciones, sobre el área total: <span class="badge ok">28 %</span> dentro del criterio de diseño · <span class="badge warn">42 %</span> supera el criterio de diseño · <span class="badge err">55 %</span> excede el máximo de 50 % (TIA-569-E cap. 9 / BICSI; aeroducto 20 % NEC 376.22).</p><p>Criterio Sinergia de prellenado: <b>30 %</b>.</p>
       <p>❌ error que impide el cálculo · ⚠ advertencia a revisar · ✓ verificación correcta.</p>
     </section>
     <section class="card">
@@ -875,6 +897,8 @@
     document.documentElement.style.setProperty('--topbar-h', document.getElementById('topbar').offsetHeight + 'px');
   }
   window.addEventListener('resize', syncTopbarHeight);
+  // la altura cambia al cargar la fuente Montserrat
+  if (window.ResizeObserver) new ResizeObserver(syncTopbarHeight).observe(document.getElementById('topbar'));
   window.addEventListener('beforeunload', () => { if (S.saveTimer) save(); });
   window.addEventListener('storage', async (e) => {
     if (e.key === 'tc.catalog.v1') { S.catalog = await Store.getCatalog(); render(); toast('Catálogo actualizado'); }
@@ -889,7 +913,9 @@
     let p = last ? await Store.getProject(last) : null;
     if (!p && list.length) p = await Store.getProject(list[0].id);
     if (!p) { p = newProject(); await Store.saveProject(p); }
-    await openProject(p);
+    // enlace directo: index.html#memoria o #ayuda
+    const hashTab = location.hash.slice(1);
+    await openProject(p, ['memoria', 'ayuda'].includes(hashTab) ? hashTab : 'proyecto');
     saveState.textContent = 'Guardado ✓';
   }
   init();

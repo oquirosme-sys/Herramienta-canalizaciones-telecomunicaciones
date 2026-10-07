@@ -6,9 +6,13 @@
   --border-strong: #b9c1ca;
   --text: #1d2733;
   --muted: #5d6b7a;
-  --primary: #0b5c8c;
+  /* Herramientas eléctricas Sinergia: azul */
+  --brand: #0b3d91;
+  --brand-2: #1565c0;
+  --brand-ink: #ffffff;
+  --primary: #1565c0;
   --primary-ink: #ffffff;
-  --primary-soft: #e3f0f8;
+  --primary-soft: #e3eefb;
   --ok: #1f7a46;
   --ok-soft: #e2f4e9;
   --warn: #9a5b00;
@@ -18,19 +22,19 @@
   --input-bg: #ffffff;
   --calc-bg: #f1f4f7;
   --radius: 8px;
-  --font: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font: "Montserrat", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #12171d; --surface: #1a2129; --surface-2: #202832; --border: #313b47; --border-strong: #46525f;
-    --text: #e4e9ee; --muted: #9aa7b4; --primary: #4aa3d8; --primary-ink: #0d1318; --primary-soft: #183447;
+    --text: #e4e9ee; --muted: #9aa7b4; --primary: #5aa2f0; --primary-ink: #0d1318; --primary-soft: #16304f; --brand: #0b2e66; --brand-2: #1a56b0;
     --ok: #5cc98a; --ok-soft: #173426; --warn: #f0b44c; --warn-soft: #3a2d12; --err: #f2766b; --err-soft: #3d1b18;
     --input-bg: #11161c; --calc-bg: #222b35;
   }
 }
 :root[data-theme="dark"] {
   --bg: #12171d; --surface: #1a2129; --surface-2: #202832; --border: #313b47; --border-strong: #46525f;
-  --text: #e4e9ee; --muted: #9aa7b4; --primary: #4aa3d8; --primary-ink: #0d1318; --primary-soft: #183447;
+  --text: #e4e9ee; --muted: #9aa7b4; --primary: #5aa2f0; --primary-ink: #0d1318; --primary-soft: #16304f; --brand: #0b2e66; --brand-2: #1a56b0;
   --ok: #5cc98a; --ok-soft: #173426; --warn: #f0b44c; --warn-soft: #3a2d12; --err: #f2766b; --err-soft: #3d1b18;
   --input-bg: #11161c; --calc-bg: #222b35;
 }
@@ -49,15 +53,22 @@ a { color: var(--primary); }
 
 /* ---------- Encabezado ---------- */
 .topbar {
-  position: sticky; top: 0; z-index: 20; background: var(--surface); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; background: linear-gradient(90deg, var(--brand), var(--brand-2)); color: var(--brand-ink);
+  border-bottom: 3px solid #f2b705;
   display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 16px;
 }
 .brand { display: flex; flex-direction: column; min-width: 0; }
 .brand h1 { font-size: 16px; }
-.brand span { font-size: 12px; color: var(--muted); }
+.brand span { font-size: 12px; color: rgba(255,255,255,.8); }
+.topbar .btn { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.35); color: #fff; }
+.topbar .btn:hover { background: rgba(255,255,255,.22); }
+.topbar .btn.danger { color: #ffd2cc; }
+.topbar select { background: rgba(255,255,255,.95); color: #12233f; }
+.topbar .field > span { color: rgba(255,255,255,.85); }
+.topbar a.btn { text-decoration: none; }
 .topbar .spacer { flex: 1; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.save-state { font-size: 12px; color: var(--muted); min-width: 80px; text-align: right; }
+.save-state { font-size: 12px; color: rgba(255,255,255,.85); min-width: 80px; text-align: right; }
 
 /* ---------- Pestañas ---------- */
 .tabs {
@@ -71,7 +82,7 @@ a { color: var(--primary); }
   display: inline-flex; align-items: center; gap: 6px;
 }
 .tab:hover { color: var(--text); background: var(--surface-2); }
-.tab.active { color: var(--primary); background: var(--bg); border-color: var(--border); font-weight: 600; margin-bottom: -1px; }
+.tab.active { color: var(--primary); background: var(--bg); border-color: var(--border); border-top: 3px solid var(--primary); font-weight: 600; margin-bottom: -1px; }
 .tab.level { font-variant-numeric: tabular-nums; }
 .tab .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--err); }
 .tab .dot.warn { background: var(--warn); }
@@ -149,18 +160,55 @@ tfoot td { font-weight: 600; background: var(--surface-2); }
 .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
 .note p { margin: 4px 0; }
 .callout { border-left: 3px solid var(--primary); background: var(--primary-soft); padding: 8px 12px; border-radius: 4px; font-size: 13px; }
-.callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+.callout.warn { border-color: #e0a800; background: #fff3c4; color: #5c4300; }
+.callout.err { border-color: var(--err); background: var(--err-soft); }
+.sec-code { display: inline-block; background: var(--primary); color: var(--primary-ink); border-radius: 4px; padding: 1px 8px; margin-right: 6px; font-variant-numeric: tabular-nums; }
 .row-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
 
-/* ---------- Memoria de cálculo ---------- */
-.report h2 { margin: 18px 0 8px; font-size: 16px; color: var(--primary); }
-.report h2:first-child { margin-top: 0; }
-.report table { font-size: 13px; }
-.report .title { text-align: center; margin-bottom: 12px; }
-.report .title h1 { font-size: 18px; }
+/* ---------- Memoria de cálculo: formato de entregable Sinergia ----------
+   Hoja carta, márgenes 3,0 cm (lados) y 2,5 cm (arriba/abajo), Montserrat 11 pt,
+   interlínea 1,08, justificado. Cuerpo monocromo; color solo para criticidad. */
+.doc {
+  --doc-ink: #000; --doc-gray: #808080; --doc-green: #385623; --doc-err: #b42318; --doc-warn: #9a5b00;
+  background: #fff; color: var(--doc-ink);
+  width: 100%; max-width: 21.59cm; margin: 0 auto 16px; padding: 2.5cm 3cm;
+  font: 11pt/1.08 "Montserrat", Arial, sans-serif; text-align: justify;
+  box-shadow: 0 2px 12px rgba(0,0,0,.18); border-radius: 2px;
+}
+.doc-head { display: flex; justify-content: space-between; align-items: center; margin: -1.25cm -1.65cm 1cm; }
+.doc-logo { font-weight: 700; font-size: 22pt; color: var(--doc-green); letter-spacing: -.5px; line-height: 1; }
+.doc-logo small { display: block; font-size: 8pt; font-weight: 500; letter-spacing: 0; color: var(--doc-gray); }
+.doc-addr { font-size: 8pt; text-align: right; line-height: 1.3; }
+.doc-title { font-size: 14pt; font-weight: 700; text-align: left; margin: 0 0 4px; }
+.doc-sub { margin: 0 0 18px; color: var(--doc-gray); text-align: left; }
+.doc h2 { font-size: 11pt; font-weight: 700; color: var(--doc-ink); margin: 18px 0 8px; text-align: left; }
+.doc .kv { font-size: 11pt; margin-bottom: 8pt; }
+.doc .kv dt { color: var(--doc-gray); }
+.doc-table { margin: 6pt 0 14pt; }
+.doc-table figcaption { text-align: center; font-size: 10pt; margin-bottom: 4pt; }
+.doc-table figcaption span { font-weight: 600; }
+.doc .table-wrap { border: none; border-radius: 0; }
+.doc table { font-size: 8pt; border-top: 1.5pt solid #000; border-bottom: 1.5pt solid #000; text-align: left; }
+.doc thead th {
+  background: none; color: #000; font-weight: 600; font-size: 8pt; text-transform: none; position: static;
+  border-bottom: 1pt solid #000; vertical-align: bottom;
+}
+.doc th, .doc td { border-left: none; border-right: none; border-top: none; border-bottom: .5pt solid #bfbfbf; padding: 3pt 4pt; }
+.doc tbody tr:hover { background: none; }
+.doc tr.total td { font-weight: 700; border-top: 1pt solid #000; }
+.doc td.num, .doc th.num { text-align: right; }
+.doc td.obs { min-width: 6cm; }
+.doc .pn { font-size: 8pt; }
+.doc .note { color: var(--doc-gray); font-size: 8pt; text-align: left; border: none; padding: 0; box-shadow: none; }
+.crit-err { color: var(--doc-err, var(--err)); font-weight: 600; }
+.crit-warn { color: var(--doc-warn, var(--warn)); font-weight: 600; }
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
 .kv dt { color: var(--muted); }
 .kv dd { margin: 0; }
+@media (max-width: 900px) {
+  .doc { padding: 24px 16px; }
+  .doc-head { margin: 0 0 16px; }
+}
 
 /* ---------- Modal ---------- */
 .modal-back { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
@@ -185,15 +233,33 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 16px
 
 @media print {
   :root { --bg: #fff; --surface: #fff; --surface-2: #f3f3f3; --calc-bg: #fff; --text: #000; }
+  body { background: #fff; }
   .topbar, .tabs, footer, .no-print, .btn { display: none !important; }
   main { padding: 0; max-width: none; }
   .card { border: none; padding: 0; margin-bottom: 10px; }
   .table-wrap { overflow: visible; border: none; }
-  table { font-size: 10px; }
+  table { font-size: 8pt; }
   th, td { border: 1px solid #999; padding: 2px 4px; }
   thead th { position: static; }
   input, select { border: none; padding: 0; background: none; appearance: none; -webkit-appearance: none; }
-  .report h2 { break-after: avoid; }
   tr { break-inside: avoid; }
-  @page { size: landscape; margin: 12mm; }
+  /* Pestañas de nivel: carta apaisada */
+  @page { size: letter landscape; margin: 12mm; }
+
+  /* Memoria: hoja carta vertical con membrete en las cajas de margen (formato Sinergia) */
+  .doc { page: memoria; box-shadow: none; max-width: none; padding: 0; margin: 0; }
+  .doc-head { display: none; }
+  .doc th, .doc td { border-left: none; border-right: none; border-top: none; }
+  .doc h2, .doc-table figcaption { break-after: avoid; }
+  .doc-table { break-inside: avoid; }
+  .doc h2 + .doc-table, .doc h2 + .kv { break-before: avoid; }
+}
+@page memoria {
+  size: letter portrait;
+  margin: 2.5cm 3cm;
+  @top-left { content: "sinergia"; font: 700 16pt "Montserrat", Arial, sans-serif; color: #385623; vertical-align: bottom; padding-bottom: 8mm; }
+  @top-right { content: "Sinergia Consultoría Mecánica y Eléctrica S.A \A Oficentro Plaza Roble, Edificio Pórtico, Escazú"; white-space: pre; font: 8pt "Montserrat", Arial, sans-serif; text-align: right; vertical-align: bottom; padding-bottom: 8mm; }
+  @bottom-left { content: "Memoria canalizaciones telecom"; font: 8pt "Montserrat", Arial, sans-serif; color: #808080; width: 31%; white-space: nowrap; }
+  @bottom-center { content: "www.sinergia.co.cr \A info@sinergia.co.cr"; white-space: pre; font: 8pt "Montserrat", Arial, sans-serif; color: #385623; width: 38%; }
+  @bottom-right { content: "Página " counter(page); font: 8pt "Montserrat", Arial, sans-serif; color: #808080; width: 31%; text-align: right; }
 }
