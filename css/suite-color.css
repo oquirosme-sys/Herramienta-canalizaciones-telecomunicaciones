@@ -1,0 +1,34 @@
+/* Capa 2 · suite-color.css — quién soy.
+   Registro de color por aplicación de Sinergia Suite: cada página declara <body data-app="…">
+   y la tesela, el título de la barra, el botón primario, el anillo de foco y las cabeceras
+   de tabla y de modal leen var(--app).
+   El color identifica; NO se usa para estados (error/advertencia/correcto conservan sus colores).
+   NOTA: este proyecto no tiene copia de references/paleta.md; el valor de "canalizaciones"
+   es el azul de herramientas eléctricas y debe conciliarse con el registro oficial. */
+
+[data-app] {
+  --app-tinta: #ffffff;
+  /* las piezas de contenido (botón primario, foco, enlaces) siguen al color de la app */
+  --primary: var(--app);
+  --primary-ink: var(--app-tinta);
+  --primary-soft: var(--app-suave);
+}
+
+/* Portal (neutro) */
+[data-app="suite"] {
+  --app: #3a3f4b; --app-claro: #5a6070; --app-oscuro: #262a33;
+  --app-suave: #eceef2; --app-sombra: rgba(38, 42, 51, .35);
+}
+
+/* Canalizaciones telecom — azul de herramientas eléctricas */
+[data-app="canalizaciones"] {
+  --app: #1f5fd6; --app-claro: #4a86f0; --app-oscuro: #1546a8;
+  --app-suave: #e7effd; --app-sombra: rgba(31, 95, 214, .38);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-app="canalizaciones"] {
+    --app: #5b95f5; --app-claro: #6fa3f8; --app-oscuro: #2c64cc; --app-suave: #182a4a; --app-tinta: #ffffff;
+    --primary-ink: #0b1220;
+  }
+}

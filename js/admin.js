@@ -108,7 +108,7 @@
 
   // ---------- Render ----------
   function render() {
-    tabsEl.innerHTML = TABS.map(([id, label]) => `<button class="tab ${A.tab === id ? 'active' : ''}" data-tab="${id}">${label}</button>`).join('');
+    tabsEl.innerHTML = TABS.map(([id, label]) => `<button class="seccion ${A.tab === id ? 'activa' : ''}" data-tab="${id}">${label}</button>`).join('');
     const y = window.scrollY;
     ({ cables: renderCables, pathways: renderPathways, conduits: renderConduits, managers: renderManagers, criteria: renderCriteria, backup: renderBackup })[A.tab]();
     window.scrollTo(0, y);

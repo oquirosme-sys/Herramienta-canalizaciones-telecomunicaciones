@@ -10,9 +10,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/suite-color.css">
+  <link rel="stylesheet" href="css/suite-mac.css">
+  <link rel="stylesheet" href="css/suite-app.css">
   <style>
-    .savebar { position: sticky; top: 0; z-index: 25; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-      padding: 8px 16px; background: var(--warn-soft); border-bottom: 1px solid var(--warn); }
+    .savebar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 16px;
+      background: var(--warn-soft); border-top: 1px solid var(--warn); }
     .login { max-width: 380px; margin: 10vh auto; }
     td input.w-num { width: 90px; text-align: right; }
     td input.w-txt { min-width: 160px; }
@@ -21,27 +24,44 @@
     .media-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 12px; background: var(--surface-2); }
   </style>
 </head>
-<body>
-  <header class="topbar" id="topbar">
-    <div class="brand">
-      <h1>Administración de catálogos</h1>
-      <span>Cables · Canalizaciones y marcas · Tuberías · Organizadores · Criterios</span>
+<body data-app="canalizaciones">
+  <header class="barra vidrio" id="topbar">
+    <div class="barra-in">
+      <a class="volver-suite" id="volverSuite" href="index.html">← Suite</a>
+      <div class="app-id">
+        <span class="tesela" aria-hidden="true">
+          <!-- glifo: canasta portacables con cables -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 8v9.5A1.5 1.5 0 0 0 4.5 19h15a1.5 1.5 0 0 0 1.5-1.5V8"/>
+            <path d="M8 12v7M12 12v7M16 12v7M3 12.5h18" stroke-width="1.2" opacity=".6"/>
+            <circle cx="8" cy="15.6" r="1.9" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="15.6" r="1.9" fill="currentColor" stroke="none"/>
+            <circle cx="16" cy="15.6" r="1.9" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <div>
+          <h1 class="app-nombre">Canalizaciones telecom · administración</h1>
+          <div class="app-sub">Cables · canalizaciones y marcas · tuberías · organizadores · criterios</div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div class="toolbar">
+        <a class="btn" href="index.html">Volver a la herramienta</a>
+        <button class="btn hidden" id="btnLogout" type="button">Cerrar sesión</button>
+      </div>
     </div>
-    <div class="spacer"></div>
-    <div class="toolbar">
-      <a class="btn" href="index.html">← Volver a la herramienta</a>
-      <button class="btn hidden" id="btnLogout" type="button">Cerrar sesión</button>
+    <div class="barra-in barra-secciones">
+      <nav class="secciones hidden" id="tabs" aria-label="Secciones del catálogo"></nav>
+    </div>
+    <div id="savebar" class="savebar hidden" role="status">
+      <b>Cambios sin guardar en el catálogo.</b>
+      <button class="btn primary sm" id="btnSave" type="button">Guardar catálogo</button>
+      <button class="btn sm" id="btnDiscard" type="button">Descartar</button>
     </div>
   </header>
 
-  <div id="savebar" class="savebar hidden" role="status">
-    <b>Cambios sin guardar en el catálogo.</b>
-    <button class="btn primary sm" id="btnSave" type="button">Guardar catálogo</button>
-    <button class="btn sm" id="btnDiscard" type="button">Descartar</button>
-  </div>
-
-  <nav class="tabs hidden" id="tabs" aria-label="Secciones del catálogo"></nav>
-  <main id="view"></main>
+  <main id="view" class="pagina"></main>
+  <script>document.addEventListener('DOMContentLoaded', () => { if (window.APP_CONFIG && APP_CONFIG.suiteUrl) document.getElementById('volverSuite').href = APP_CONFIG.suiteUrl; });</script>
 
   <script src="js/config.js"></script>
   <script src="js/catalog-default.js"></script>

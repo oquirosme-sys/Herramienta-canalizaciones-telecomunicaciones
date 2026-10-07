@@ -6,10 +6,6 @@
   --border-strong: #b9c1ca;
   --text: #1d2733;
   --muted: #5d6b7a;
-  /* Herramientas eléctricas Sinergia: azul */
-  --brand: #0b3d91;
-  --brand-2: #1565c0;
-  --brand-ink: #ffffff;
   --primary: #1565c0;
   --primary-ink: #ffffff;
   --primary-soft: #e3eefb;
@@ -27,14 +23,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #12171d; --surface: #1a2129; --surface-2: #202832; --border: #313b47; --border-strong: #46525f;
-    --text: #e4e9ee; --muted: #9aa7b4; --primary: #5aa2f0; --primary-ink: #0d1318; --primary-soft: #16304f; --brand: #0b2e66; --brand-2: #1a56b0;
+    --text: #e4e9ee; --muted: #9aa7b4; --primary: #5aa2f0; --primary-ink: #0d1318; --primary-soft: #16304f;
     --ok: #5cc98a; --ok-soft: #173426; --warn: #f0b44c; --warn-soft: #3a2d12; --err: #f2766b; --err-soft: #3d1b18;
     --input-bg: #11161c; --calc-bg: #222b35;
   }
 }
 :root[data-theme="dark"] {
   --bg: #12171d; --surface: #1a2129; --surface-2: #202832; --border: #313b47; --border-strong: #46525f;
-  --text: #e4e9ee; --muted: #9aa7b4; --primary: #5aa2f0; --primary-ink: #0d1318; --primary-soft: #16304f; --brand: #0b2e66; --brand-2: #1a56b0;
+  --text: #e4e9ee; --muted: #9aa7b4; --primary: #5aa2f0; --primary-ink: #0d1318; --primary-soft: #16304f;
   --ok: #5cc98a; --ok-soft: #173426; --warn: #f0b44c; --warn-soft: #3a2d12; --err: #f2766b; --err-soft: #3d1b18;
   --input-bg: #11161c; --calc-bg: #222b35;
 }
@@ -51,44 +47,7 @@ a { color: var(--primary); }
 .en { color: var(--muted); font-weight: 400; }
 .hidden { display: none !important; }
 
-/* ---------- Encabezado ---------- */
-.topbar {
-  position: sticky; top: 0; z-index: 20; background: linear-gradient(90deg, var(--brand), var(--brand-2)); color: var(--brand-ink);
-  border-bottom: 3px solid #f2b705;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 16px;
-}
-.brand { display: flex; flex-direction: column; min-width: 0; }
-.brand h1 { font-size: 16px; }
-.brand span { font-size: 12px; color: rgba(255,255,255,.8); }
-.topbar .btn { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.35); color: #fff; }
-.topbar .btn:hover { background: rgba(255,255,255,.22); }
-.topbar .btn.danger { color: #ffd2cc; }
-.topbar select { background: rgba(255,255,255,.95); color: #12233f; }
-.topbar .field > span { color: rgba(255,255,255,.85); }
-.topbar a.btn { text-decoration: none; }
-.topbar .spacer { flex: 1; }
-.toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.save-state { font-size: 12px; color: rgba(255,255,255,.85); min-width: 80px; text-align: right; }
-
-/* ---------- Pestañas ---------- */
-.tabs {
-  display: flex; gap: 2px; overflow-x: auto; padding: 8px 16px 0; background: var(--surface);
-  border-bottom: 1px solid var(--border); position: sticky; top: var(--topbar-h, 56px); z-index: 15;
-  scrollbar-width: thin;
-}
-.tab {
-  border: 1px solid transparent; border-bottom: none; background: none; color: var(--muted);
-  padding: 8px 14px; border-radius: 8px 8px 0 0; cursor: pointer; font: inherit; white-space: nowrap;
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.tab:hover { color: var(--text); background: var(--surface-2); }
-.tab.active { color: var(--primary); background: var(--bg); border-color: var(--border); border-top: 3px solid var(--primary); font-weight: 600; margin-bottom: -1px; }
-.tab.level { font-variant-numeric: tabular-nums; }
-.tab .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--err); }
-.tab .dot.warn { background: var(--warn); }
-.tab-sep { width: 1px; background: var(--border); margin: 6px 6px 8px; flex: none; }
-
-main { padding: 16px; max-width: 1600px; margin: 0 auto; }
+/* El armazón (barra, secciones, página, pie) vive en suite-app.css */
 
 /* ---------- Tarjetas y formularios ---------- */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
@@ -120,7 +79,7 @@ input[type="checkbox"] { width: 16px; height: 16px; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
 table { border-collapse: collapse; width: 100%; }
 th, td { border-bottom: 1px solid var(--border); padding: 5px 6px; text-align: left; vertical-align: middle; }
-thead th { background: var(--surface-2); font-size: 12px; font-weight: 600; color: var(--muted); position: sticky; top: 0; }
+thead th { background: var(--primary-soft); font-size: 12px; font-weight: 600; color: var(--primary); position: sticky; top: 0; }
 th.cable-col { min-width: 74px; text-align: center; }
 th.cable-col small { display: block; font-weight: 400; }
 tbody tr:hover { background: var(--surface-2); }
@@ -205,37 +164,12 @@ tfoot td { font-weight: 600; background: var(--surface-2); }
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
 .kv dt { color: var(--muted); }
 .kv dd { margin: 0; }
-@media (max-width: 900px) {
-  .doc { padding: 24px 16px; }
-  .doc-head { margin: 0 0 16px; }
-}
-
-/* ---------- Modal ---------- */
-.modal-back { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
-.modal { background: var(--surface); border-radius: var(--radius); padding: 18px; width: 100%; max-width: 460px; box-shadow: 0 10px 40px rgba(0,0,0,.25); }
-.modal h3 { margin-bottom: 12px; }
-.modal .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-
-.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 6px; z-index: 60; font-size: 13px; }
-
-footer { text-align: center; color: var(--muted); font-size: 12px; padding: 16px; }
-
-@media (max-width: 900px) {
-  .topbar { position: static; }
-  .tabs { top: 0; }
-}
-@media (max-width: 700px) {
-  main { padding: 10px; }
-  .topbar { padding: 8px 10px; }
-  .tabs { padding: 6px 10px 0; }
-  .save-state { text-align: left; }
-}
 
 @media print {
   :root { --bg: #fff; --surface: #fff; --surface-2: #f3f3f3; --calc-bg: #fff; --text: #000; }
   body { background: #fff; }
-  .topbar, .tabs, footer, .no-print, .btn { display: none !important; }
-  main { padding: 0; max-width: none; }
+  .barra, .pie, .no-print, .btn { display: none !important; }
+  .pagina { padding: 0; max-width: none; }
   .card { border: none; padding: 0; margin-bottom: 10px; }
   .table-wrap { overflow: visible; border: none; }
   table { font-size: 8pt; }

@@ -169,15 +169,15 @@
     const lv = S.project.levels.map((l) => {
       const k = Calc.evalLevel(l, c).counts;
       const dot = k.errors ? '<i class="dot" title="Con errores"></i>' : k.warnings ? '<i class="dot warn" title="Con advertencias"></i>' : '';
-      return `<button class="tab level ${S.tab === l.id ? 'active' : ''}" data-tab="${l.id}" title="${esc(l.name)}">${esc(l.code || '?')}${dot}</button>`;
+      return `<button class="seccion nivel ${S.tab === l.id ? 'activa' : ''}" data-tab="${l.id}" title="${esc(l.name)}">${esc(l.code || '?')}${dot}</button>`;
     }).join('');
     tabsEl.innerHTML = `
-      <button class="tab ${S.tab === 'proyecto' ? 'active' : ''}" data-tab="proyecto">Proyecto</button>
-      <span class="tab-sep"></span>${lv}
-      <button class="tab" data-act="addLevel" title="Agregar nivel">+ Nivel</button>
-      <span class="tab-sep"></span>
-      <button class="tab ${S.tab === 'memoria' ? 'active' : ''}" data-tab="memoria">Memoria de cálculo</button>
-      <button class="tab ${S.tab === 'ayuda' ? 'active' : ''}" data-tab="ayuda">Ayuda</button>`;
+      <button class="seccion ${S.tab === 'proyecto' ? 'activa' : ''}" data-tab="proyecto">Proyecto</button>
+      <span class="seccion-sep"></span>${lv}
+      <button class="seccion" data-act="addLevel" title="Agregar nivel">+ Nivel</button>
+      <span class="seccion-sep"></span>
+      <button class="seccion ${S.tab === 'memoria' ? 'activa' : ''}" data-tab="memoria">Memoria de cálculo</button>
+      <button class="seccion ${S.tab === 'ayuda' ? 'activa' : ''}" data-tab="ayuda">Ayuda</button>`;
   }
 
   tabsEl.addEventListener('click', (e) => {
@@ -535,7 +535,7 @@
       <p class="small muted" style="margin:-6px 0 8px">% de llenado: <b>${Math.round(c.fill * 100)} %</b> ${fillTxt(c.fill)}${brands ? ' · ' + brands : ''} <span class="muted">(se definen en Proyecto)</span></p>
       <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>Sección o nivel / Section</th><th>Tipo de canalización / Pathway type</th>${cableHeaders(c)}
-          <th class="num">Área total (mm²)</th><th>Recomendada* (H×W)</th><th>P/N recomendado</th><th>Selección / Selected</th><th>P/N seleccionado</th><th class="center" title="Verde: dentro del criterio · Amarillo: supera el criterio de diseño · Rojo: excede el 50 % (TIA-569-E cap. 9 / BICSI)">% llenado real (área total, máx. 50 %)</th><th>Distancia (m)</th><th>Observaciones</th><th class="no-print"></th></tr></thead>
+          <th class="num">Área total (mm²)</th><th>Recomendada* (H×W)</th><th>P/N recomendado</th><th>Selección / Selected</th><th>P/N seleccionado</th><th class="center" title="Verde: dentro del criterio · Amarillo: supera el criterio de diseño · Rojo: excede el 50 % (TIA-569-E cap. 9 / BICSI)">% llenado<br><small>(área total)</small></th><th>Distancia (m)</th><th>Observaciones</th><th class="no-print"></th></tr></thead>
         <tbody>${l.pathways.map((r, i) => pathwayRow(r, i, c)).join('')}</tbody>
       </table></div>
       <div class="row-inline no-print" style="margin-top:8px">
@@ -893,12 +893,8 @@
   });
 
   // ============ Inicio ============
-  function syncTopbarHeight() {
-    document.documentElement.style.setProperty('--topbar-h', document.getElementById('topbar').offsetHeight + 'px');
-  }
-  window.addEventListener('resize', syncTopbarHeight);
-  // la altura cambia al cargar la fuente Montserrat
-  if (window.ResizeObserver) new ResizeObserver(syncTopbarHeight).observe(document.getElementById('topbar'));
+  // «← Suite» lleva al portal (APP_CONFIG.suiteUrl)
+  document.getElementById('volverSuite').href = APP_CONFIG.suiteUrl || 'index.html';
   window.addEventListener('beforeunload', () => { if (S.saveTimer) save(); });
   window.addEventListener('storage', async (e) => {
     if (e.key === 'tc.catalog.v1') { S.catalog = await Store.getCatalog(); render(); toast('Catálogo actualizado'); }
@@ -907,15 +903,15 @@
   async function init() {
     S.catalog = await Store.getCatalog();
     bindToolbar();
-    syncTopbarHeight();
     const list = await Store.listProjects();
     const last = localStorage.getItem(LAST);
     let p = last ? await Store.getProject(last) : null;
     if (!p && list.length) p = await Store.getProject(list[0].id);
     if (!p) { p = newProject(); await Store.saveProject(p); }
-    // enlace directo: index.html#memoria o #ayuda
-    const hashTab = location.hash.slice(1);
-    await openProject(p, ['memoria', 'ayuda'].includes(hashTab) ? hashTab : 'proyecto');
+    // enlace directo: index.html#memoria, #ayuda o #<código de nivel> (ej. #N01)
+    const hashTab = decodeURIComponent(location.hash.slice(1));
+    const hashLevel = (p.levels || []).find((l) => l.code === hashTab);
+    await openProject(p, ['memoria', 'ayuda'].includes(hashTab) ? hashTab : hashLevel ? hashLevel.id : 'proyecto');
     saveState.textContent = 'Guardado ✓';
   }
   init();

@@ -8,35 +8,55 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Capas del Suite, en orden: 1 sistema · 2 quién soy · 3 de qué estoy hecho · 4 cómo me organizo -->
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/suite-color.css">
+  <link rel="stylesheet" href="css/suite-mac.css">
+  <link rel="stylesheet" href="css/suite-app.css">
 </head>
-<body>
-  <header class="topbar" id="topbar">
-    <div class="brand">
-      <h1>Canalizaciones para telecomunicaciones</h1>
-      <span>Memoria de cálculo · Telecommunications pathway design calculations</span>
+<body data-app="canalizaciones">
+  <header class="barra vidrio" id="topbar">
+    <div class="barra-in">
+      <a class="volver-suite" id="volverSuite" href="#">← Suite</a>
+      <div class="app-id">
+        <span class="tesela" aria-hidden="true">
+          <!-- glifo: canasta portacables con cables -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 8v9.5A1.5 1.5 0 0 0 4.5 19h15a1.5 1.5 0 0 0 1.5-1.5V8"/>
+            <path d="M8 12v7M12 12v7M16 12v7M3 12.5h18" stroke-width="1.2" opacity=".6"/>
+            <circle cx="8" cy="15.6" r="1.9" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="15.6" r="1.9" fill="currentColor" stroke="none"/>
+            <circle cx="16" cy="15.6" r="1.9" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <div>
+          <h1 class="app-nombre">Canalizaciones telecom</h1>
+          <div class="app-sub">Memoria de cálculo · TIA-569-E · NEC 2020</div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div class="toolbar">
+        <label class="field" style="flex-direction:row;align-items:center;gap:6px">
+          <span>Proyecto</span>
+          <select id="projectSelect" aria-label="Proyecto abierto"></select>
+        </label>
+        <button class="btn" id="btnNew" type="button">Nuevo</button>
+        <button class="btn" id="btnDup" type="button">Duplicar</button>
+        <button class="btn" id="btnExport" type="button" title="Descargar el proyecto como archivo .json">Exportar</button>
+        <button class="btn" id="btnImport" type="button" title="Abrir un proyecto .json">Importar</button>
+        <button class="btn danger" id="btnDelete" type="button">Eliminar</button>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+      <div class="save-state" id="saveState"></div>
     </div>
-    <div class="spacer"></div>
-    <div class="toolbar">
-      <label class="field" style="flex-direction:row;align-items:center;gap:6px">
-        <span>Proyecto</span>
-        <select id="projectSelect" aria-label="Proyecto abierto"></select>
-      </label>
-      <button class="btn" id="btnNew" type="button">Nuevo</button>
-      <button class="btn" id="btnDup" type="button">Duplicar</button>
-      <button class="btn" id="btnExport" type="button" title="Descargar el proyecto como archivo .json">Exportar</button>
-      <button class="btn" id="btnImport" type="button" title="Abrir un proyecto .json">Importar</button>
-      <button class="btn danger" id="btnDelete" type="button">Eliminar</button>
-      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <div class="barra-in barra-secciones">
+      <nav class="secciones" id="tabs" aria-label="Secciones"></nav>
     </div>
-    <div class="save-state" id="saveState"></div>
   </header>
 
-  <nav class="tabs" id="tabs" aria-label="Módulos"></nav>
+  <main id="view" class="pagina"></main>
 
-  <main id="view"></main>
-
-  <footer>
+  <footer class="pie">
     <span id="footerInfo"></span> ·
     <a href="admin.html">Administración de catálogos</a>
   </footer>

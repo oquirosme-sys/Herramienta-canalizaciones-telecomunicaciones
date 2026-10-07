@@ -40,7 +40,10 @@ administrador. Para publicarlo a todos: *Exportar catálogo* y reemplazar el con
 ```
 index.html              Herramienta (Proyecto, niveles, Memoria de cálculo, Ayuda)
 admin.html              Administración de catálogos
-css/styles.css          Estilos (claro / oscuro / impresión)
+css/styles.css          Capa 1: sistema de contenido (tablas, campos, botones, impresión)
+css/suite-color.css     Capa 2: color de la app (data-app="canalizaciones")
+css/suite-mac.css       Capa 3: materialidad Suite (tesela, vidrio, movimiento)
+css/suite-app.css       Capa 4: armazón de aplicación (barra, secciones, página, pie)
 js/config.js            Configuración (versión, hash de contraseña, claves Supabase)
 js/catalog-default.js   Catálogo por defecto extraído del Excel (pestañas ocultas)
 js/storage.js           Capa de datos (localStorage hoy, Supabase en el paso 2)
@@ -49,6 +52,13 @@ js/ui.js                Utilidades de interfaz
 js/app.js               Lógica de la herramienta
 js/admin.js             Lógica del panel de administración
 ```
+
+## Sistema visual
+
+Sigue el sistema **Sinergia Suite**: `<body data-app="canalizaciones">`, barra de vidrio con
+«← Suite» (dirección en `APP_CONFIG.suiteUrl`), tesela con glifo de canasta y secciones
+segmentadas. El color azul de la app debe conciliarse con el registro oficial `paleta.md`.
+La memoria impresa sigue el formato de entregables de Sinergia (carta, membrete, tablas numeradas).
 
 ## Publicar en GitHub Pages
 
