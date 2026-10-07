@@ -532,7 +532,7 @@
       <div class="card-head">
         <h3><span class="sec-code">${esc(l.code)}-A</span> Canalizaciones <span class="en">/ Pathways</span> — canasta, escalera, aeroducto, ducto de fibra</h3>
       </div>
-      <p class="small muted" style="margin:-6px 0 8px">% de llenado: <b>${Math.round(c.fill * 100)} %</b> ${fillTxt(c.fill)}${brands ? ' · ' + brands : ''} <span class="muted">(se definen en Proyecto)</span> · <a href="#tipos-canalizacion" data-act="verTipos">¿Qué tipo usar?</a></p>
+      <p class="small muted" style="margin:-6px 0 8px">% de llenado: <b>${Math.round(c.fill * 100)} %</b> ${fillTxt(c.fill)}${brands ? ' · ' + brands : ''} <span class="muted">(se definen en Proyecto)</span> · <a href="#tipos-canalizacion" data-act="verTipos" class="no-print">¿Qué tipo usar?</a></p>
       <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>Sección o nivel / Section</th><th>Tipo de canalización / Pathway type</th>${cableHeaders(c)}
           <th class="num">Área total (mm²)</th><th>Recomendada* (H×W)</th><th>P/N recomendado</th><th>Selección / Selected</th><th>P/N seleccionado</th><th class="center" title="Verde: dentro del criterio · Amarillo: supera el criterio de diseño · Rojo: excede el 50 % (TIA-569-E cap. 9 / BICSI)">% llenado<br><small>(área total)</small></th><th>Distancia (m)</th><th>Observaciones</th><th class="no-print"></th></tr></thead>
@@ -715,7 +715,7 @@
     </div>
     <article class="report doc">
       <header class="doc-head">
-        <div class="doc-logo">sinergia<small>ingeniería</small></div>
+        <img class="doc-logo" src="img/logo-sinergia.png" alt="Sinergia Ingeniería">
         <div class="doc-addr">Sinergia Consultoría Mecánica y Eléctrica S.A<br>Oficentro Plaza Roble, Edificio Pórtico, Escazú</div>
       </header>
       <h1 class="doc-title">Memoria de cálculo de canalizaciones para telecomunicaciones</h1>

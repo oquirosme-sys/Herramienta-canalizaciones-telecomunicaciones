@@ -135,8 +135,8 @@ tfoot td { font-weight: 600; background: var(--surface-2); }
   box-shadow: 0 2px 12px rgba(0,0,0,.18); border-radius: 2px;
 }
 .doc-head { display: flex; justify-content: space-between; align-items: center; margin: -1.25cm -1.65cm 1cm; }
-.doc-logo { font-weight: 700; font-size: 22pt; color: var(--doc-green); letter-spacing: -.5px; line-height: 1; }
-.doc-logo small { display: block; font-size: 8pt; font-weight: 500; letter-spacing: 0; color: var(--doc-gray); }
+/* logo horizontal 5,7 cm; invade el margen izquierdo a propósito (formato Sinergia) */
+.doc-logo { width: 5.7cm; height: auto; display: block; }
 .doc-addr { font-size: 8pt; text-align: right; line-height: 1.3; }
 .doc-title { font-size: 14pt; font-weight: 700; text-align: left; margin: 0 0 4px; }
 .doc-sub { margin: 0 0 18px; color: var(--doc-gray); text-align: left; }
@@ -196,7 +196,7 @@ tfoot td { font-weight: 600; background: var(--surface-2); }
   body { background: #fff; }
   .barra, .pie, .no-print, .btn { display: none !important; }
   .pagina { padding: 0; max-width: none; }
-  .card { border: none; padding: 0; margin-bottom: 10px; }
+  .card { border: none; padding: 0; margin-bottom: 10px; box-shadow: none; }
   .table-wrap { overflow: visible; border: none; }
   table { font-size: 8pt; }
   th, td { border: 1px solid #999; padding: 2px 4px; }
@@ -204,7 +204,7 @@ tfoot td { font-weight: 600; background: var(--surface-2); }
   input, select { border: none; padding: 0; background: none; appearance: none; -webkit-appearance: none; }
   tr { break-inside: avoid; }
   /* Pestañas de nivel: carta apaisada */
-  @page { size: letter landscape; margin: 12mm; }
+  @page { size: letter landscape; margin: 2.3cm 1.5cm 1.8cm; }
 
   /* Memoria: hoja carta vertical con membrete en las cajas de margen (formato Sinergia) */
   .doc { page: memoria; box-shadow: none; max-width: none; padding: 0; margin: 0; }
@@ -214,10 +214,18 @@ tfoot td { font-weight: 600; background: var(--surface-2); }
   .doc-table { break-inside: avoid; }
   .doc h2 + .doc-table, .doc h2 + .kv { break-before: avoid; }
 }
+/* Tablas de nivel impresas: carta apaisada con logo y pie */
+@page {
+  @top-left { content: ""; width: 5.2cm; background: url("../img/logo-sinergia.png") left bottom / 5.2cm auto no-repeat; margin-bottom: 4mm; }
+  @top-right { content: "Sinergia Consultoría Mecánica y Eléctrica S.A \A Oficentro Plaza Roble, Edificio Pórtico, Escazú"; white-space: pre; font: 8pt "Montserrat", Arial, sans-serif; text-align: right; vertical-align: bottom; padding-bottom: 5mm; }
+  @bottom-left { content: "Canalizaciones telecom · tablas de nivel"; font: 8pt "Montserrat", Arial, sans-serif; color: #808080; white-space: nowrap; }
+  @bottom-center { content: "www.sinergia.co.cr · info@sinergia.co.cr"; font: 8pt "Montserrat", Arial, sans-serif; color: #385623; }
+  @bottom-right { content: "Página " counter(page); font: 8pt "Montserrat", Arial, sans-serif; color: #808080; }
+}
 @page memoria {
   size: letter portrait;
   margin: 2.5cm 3cm;
-  @top-left { content: "sinergia"; font: 700 16pt "Montserrat", Arial, sans-serif; color: #385623; vertical-align: bottom; padding-bottom: 8mm; }
+  @top-left { content: ""; width: 5.7cm; margin-left: -1.65cm; background: url("../img/logo-sinergia.png") left bottom / 5.7cm auto no-repeat; margin-bottom: 6mm; }
   @top-right { content: "Sinergia Consultoría Mecánica y Eléctrica S.A \A Oficentro Plaza Roble, Edificio Pórtico, Escazú"; white-space: pre; font: 8pt "Montserrat", Arial, sans-serif; text-align: right; vertical-align: bottom; padding-bottom: 8mm; }
   @bottom-left { content: "Memoria canalizaciones telecom"; font: 8pt "Montserrat", Arial, sans-serif; color: #808080; width: 31%; white-space: nowrap; }
   @bottom-center { content: "www.sinergia.co.cr \A info@sinergia.co.cr"; white-space: pre; font: 8pt "Montserrat", Arial, sans-serif; color: #385623; width: 38%; }
