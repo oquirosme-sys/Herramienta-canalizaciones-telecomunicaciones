@@ -26,13 +26,14 @@
     };
   }
 
-  function newProject(name = 'Proyecto nuevo') {
+  // Proyecto nuevo: datos en blanco y un solo nivel; el usuario completa y agrega niveles
+  function newProject(name = '') {
     const cat = S.catalog;
     const pw = {};
     cat.pathwayTypes.forEach((t) => { pw[t.id] = Calc.brandsFor(cat, t.id)[0] || ''; });
     return {
       id: uid(), schema: 1, number: '', name, location: '', client: '',
-      date: new Date().toISOString().slice(0, 10), preparedBy: '', revision: '0', notes: '',
+      date: '', preparedBy: '', revision: '', notes: '',
       fillPathway: 0.3, fillManager: 0.4, brands: pw,
       cables: [
         ...cat.cableMedia.map((m) => ({
@@ -85,7 +86,7 @@
   async function refreshProjectSelect() {
     const list = await Store.listProjects();
     const sel = document.getElementById('projectSelect');
-    sel.innerHTML = list.map((p) => opt(p.id, (p.number ? p.number + ' · ' : '') + (p.name || 'Sin nombre'), p.id === S.project.id)).join('');
+    sel.innerHTML = list.map((p) => opt(p.id, (p.number ? p.number + ' · ' : '') + (p.name || 'Proyecto sin nombre'), p.id === S.project.id)).join('');
   }
   async function openProject(p, tab = 'proyecto') {
     S.project = normalizeProject(p);
@@ -102,12 +103,13 @@
       if (p) openProject(p);
     });
     document.getElementById('btnNew').addEventListener('click', async () => {
-      const r = await dialog({ title: 'Nuevo proyecto', fields: [{ name: 'name', label: 'Nombre del proyecto', value: '' }], okLabel: 'Crear' });
-      if (!r) return;
       await save();
-      const p = newProject(r.name.trim() || 'Proyecto nuevo');
+      const p = newProject();
       await Store.saveProject(p);
-      openProject(p);
+      await openProject(p);
+      toast('Proyecto nuevo: complete los datos del proyecto');
+      const first = view.querySelector('[data-p="number"]');
+      if (first) first.focus();
     });
     document.getElementById('btnDup').addEventListener('click', async () => {
       await save();
