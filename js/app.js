@@ -34,7 +34,7 @@
     return {
       id: uid(), schema: 1, number: '', name, location: '', client: '',
       date: '', preparedBy: '', revision: '', notes: '',
-      fillPathway: 0.3, fillManager: 0.4, brands: pw,
+      fillPathway: SINERGIA_FILL, fillManager: SINERGIA_FILL, brands: pw,
       cables: [
         ...cat.cableMedia.map((m) => ({
           id: uid(), mediaId: m.id,
